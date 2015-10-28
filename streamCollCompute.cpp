@@ -1,4 +1,3 @@
-#include "equilibrium.h"
 #include <iostream>
 
 void streamingAndCollisionComputeMacroBodyForce
@@ -90,7 +89,7 @@ void streamingAndCollisionComputeMacro
     }
 }
 
-void streamingAndCollisionComputeSquare
+/*void streamingAndCollisionComputeSquare
 (double ***fin, double ***fout, double **rho, double ***u, int Dx, int Dy, double tau, int Lx, int Ly)
   
 {
@@ -119,61 +118,61 @@ void streamingAndCollisionComputeSquare
 
 	  for (int k=0;k<9;k++)
 	    {
-	  /* Collision*/
+	      // Collision
 	  fin[x][y][k] *= (1.0-omega);
 	  fin[x][y][k] += omega*feq(k, rhoDum, ux, uy);
-	  /*Streaming*/
+	  //Streaming
 	  nx = (x + c[k][0]+Dx)%Dx; ny = (y + c[k][1]+Dy)%Dy;
 	  fout[nx][ny][k] = fin[x][y][k];
 	    }
-	  /*Assign fields values to lattice arrays (heap)*/
+	  //Assign fields values to lattice arrays (heap)
 	  u[x][y][0] = ux; u[x][y][1] = uy;
 	  rho[x][y] = rhoDum;
 	      }
 	}
     }
-}
+    }*/
 
-void streamingAndCollisionComputeSquare
-(double ***fin, double ***fout, double **rho, double ***u, int Dx, int Dy, double tau)
+//void streamingAndCollisionComputeSquare
+//(double ***fin, double ***fout, double **rho, double ***u, int Dx, int Dy, double tau)
 /*This function applies the streaming and collision operator to the fluid AROUND the square. It considers the inside the square to be NONFLUID*/
 /*This function is UNUSABLE at the moment because it uses the OBSOLETE function feq()*/
 /*This function is NON OPTIMIZED*/
-{
-  double rhoDum;
-  double ux, uy; double omega = 1./tau;
-  int c[9][2] = {{0,0}, {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1}};
-  int nx, ny;
+//{
+  // double rhoDum;
+  // double ux, uy; double omega = 1./tau;
+  // int c[9][2] = {{0,0}, {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1}};
+  // int nx, ny;
 
-   for(int x=0;x<Dx;x++)
-    {
-      for(int y=0;y<Dy;y++)
-	{
-	  rhoDum = 0.0;
-	  ux = uy = 0.0;
-	  for (int k=0;k<9;k++)
-	    {
-	      rhoDum += fin[x][y][k];
-	      ux += fin[x][y][k]*c[k][0];
-	      uy += fin[x][y][k]*c[k][1];
-	    }
-	  ux /= rhoDum; uy /= rhoDum;
+//    for(int x=0;x<Dx;x++)
+//     {
+//       for(int y=0;y<Dy;y++)
+// 	{
+// 	  rhoDum = 0.0;
+// 	  ux = uy = 0.0;
+// 	  for (int k=0;k<9;k++)
+// 	    {
+// 	      rhoDum += fin[x][y][k];
+// 	      ux += fin[x][y][k]*c[k][0];
+// 	      uy += fin[x][y][k]*c[k][1];
+// 	    }
+// 	  ux /= rhoDum; uy /= rhoDum;
 
-	  for (int k=0;k<9;k++)
-	    {
-	  /* Collision*/
-	  fin[x][y][k] *= (1.0-omega);
-	  fin[x][y][k] += omega*feq(k, rhoDum, ux, uy);
-	  /*Streaming*/
-	  nx = (x + c[k][0]+Dx)%Dx; ny = (y + c[k][1]+Dy)%Dy;
-	  fout[nx][ny][k] = fin[x][y][k];
-	    }
-	  /*Assign fields values to lattice arrays (heap)*/
-	  u[x][y][0] = ux; u[x][y][1] = uy;
-	  rho[x][y] = rhoDum;
-	}
-    }
-}
+// 	  for (int k=0;k<9;k++)
+// 	    {
+// 	  /* Collision*/
+// 	  fin[x][y][k] *= (1.0-omega);
+// 	  fin[x][y][k] += omega*feq(k, rhoDum, ux, uy);
+// 	  /*Streaming*/
+// 	  nx = (x + c[k][0]+Dx)%Dx; ny = (y + c[k][1]+Dy)%Dy;
+// 	  fout[nx][ny][k] = fin[x][y][k];
+// 	    }
+// 	  /*Assign fields values to lattice arrays (heap)*/
+// 	  u[x][y][0] = ux; u[x][y][1] = uy;
+// 	  rho[x][y] = rhoDum;
+// 	}
+//     }
+// }*/
 
 
 
