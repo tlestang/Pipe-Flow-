@@ -1,10 +1,15 @@
-all: run
+bodyforce: main_bodyforce.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
+	g++ -o run_bodyforce main.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
 
-run: main.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
-	g++ -o run main.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
+pressure:
+	echo 'ERROR : pressure driven flow unavailable at the moment'
+# pressure: main_pressure.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
+#	g++ -o run_pressure main.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
 
-main.o: main.cpp
-	g++ -o main.o -c main.cpp
+main_bodyforce.o: main_bodyforce.cpp
+	g++ -o main_bodyforce.o -c main_bodyforce.cpp
+main_pressure.o: main_pressure.cpp
+	g++ -o main_pressure.o -c main_pressure.cpp
 initialize_lattice_arrays.o: initialize_lattice_arrays.cpp
 	g++ -o initialize_lattice_arrays.o -c initialize_lattice_arrays.cpp
 streamCollCompute.o: streamCollCompute.cpp
