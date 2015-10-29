@@ -37,14 +37,10 @@ int main()
   input_file.close();
   /*Compute or define other parameters*/
   double cs = 1./sqrt(3); double rho0 = 1.0;
-  //int Dy=3*Lx*2, Dx=4*Dy; //Dimensions of grid
-  int Dy = 50; int Dx = 200;
-  /*int xmin = (Dx-1)/3; int xmax = xmin+Lx-1;
-    int ymin = Dy/2 - Ly/2; int ymax = ymin + Ly -1;*/
-  int radius = 5;
-  int xmin = Dx/10; int xmax = xmin + 2*radius;
-  int ymin = Dy/4; int ymax = Dy/4 + 2*radius;
-  double Ma;   //Mach number
+  int Dy=4*Lx, Dx=2*Dy; //Dimensions of grid
+  int xmin = (Dx-1)/2; int xmax = xmin+Lx;
+  int ymin = Dy/2 - Ly/2; int ymax = ymin + Ly;
+    double Ma;   //Mach number
   double nu = ot*(tau-0.5);
   //----------- Misc ----------
   double uxSum = 0.0, uxMean;
@@ -84,11 +80,13 @@ int main()
     /*Initialization of population to equilibrium value*/
   initializePopulations(popHeapIn, Dx, Dy);
   initializeFields(rhoHeap, uFieldHeap, Dx, Dy);
-
+  /*Initialize counters*/
+  dummy = 0; dummy2 = 0;
+  
   /*Transient regime*/
       for (int lbTimeStepCount=0; lbTimeStepCount<numberOfTransientSteps;lbTimeStepCount++)
     {
-
+      if(lbTimeStepCount%(numberOfTransientSteps/100)==0){dummy++; cout << "Transient regime : " << dummy << "%" <<  endl;}
       /*Collision and streaming - Macroscopic fields*/
       streamingAndCollisionComputeMacroBodyForce(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau, beta);
       /* --- Boundary conditions --- */
@@ -101,36 +99,35 @@ int main()
     }
 
 
-  /*Initialize counters*/
-  dummy = 0; dummy2 = 0;
+
   /*Create folder for storing data */
-  /*  string instru = "mkdir " + folderName;
+  string instru = "mkdir " + folderName;
   system(instru.c_str());
   instru = "mkdir " + folderName + "/vtk_fluid/";
-  system(instru.c_str());*/
+  system(instru.c_str());
   /*Open output file for force*/
-  /*  string openReFile = folderName + "/re_t.datout";
+  string openReFile = folderName + "/re_t.datout";
   string openMaFile = folderName + "/ma_t.datout";
   string openForceFile = folderName + "/data_force.datout";
   ofstream ReFile, MaFile, data_force;
   ReFile.open(openReFile.c_str());
   MaFile.open(openMaFile.c_str());
-  data_force.open(openForceFile.c_str());*/
+  data_force.open(openForceFile.c_str());
 
   /*Start LBM*/
 for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
 {
-  //if(chunkID%(nbOfChunks/100)==0){dummy++; cout<<dummy<<endl;/*"%\r"; fflush(stdout);*/}
+  if(chunkID%(nbOfChunks/100)==0){dummy2++; cout<<"Running : " << dummy2<<"%"<<endl;/*\r"; fflush(stdout);*/}
 
     for (int lbTimeStepCount=0; lbTimeStepCount<nbOfTimeSteps;lbTimeStepCount++)
     {
       /*if(lbTimeStepCount%(nbOfTimeSteps/100)==0)
 	dummy++; cout<<dummy<<"%\r"; fflush(stdout);*/
-      /*      if(lbTimeStepCount%facquVtk==0)
+      if(lbTimeStepCount%facquVtk==0)
 	{
 	write_fluid_vtk(tt, Dx, Dy, rhoHeap, uFieldHeap, folderName.c_str());
 	tt++;
-	}*/
+	}
       /*Collision and streaming - Macroscopic fields*/
             streamingAndCollisionComputeMacroBodyForce(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau, beta);
       computeDomainNoSlipWalls_BB(popHeapOut, popHeapIn, Dx, Dy);
@@ -141,14 +138,14 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
       popHeapIn = popHeapOut;
       popHeapOut = temp;
 
-      /*Compute and Write force on disk
+      /*Compute and Write force on disk*/
       if(lbTimeStepCount%facquForce==0)
       {
 	F = computeForceOnSquare(popHeapIn, xmax, xmin, ymax, ymin);
 	data_force << F << endl;
-	}*/
+	}
       /*Compute Reynolds number*/
-      /*if(lbTimeStepCount%facquRe==0)
+      if(lbTimeStepCount%facquRe==0)
 	{      
 	  for(int y=0;y<Dy;y++)
 	    {
@@ -158,14 +155,14 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
 	  ReFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << (2.0*uxMean*(Ly-1))/nu << endl;
 	  MaFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << uxMean/cs << endl;
 	  uxSum=0.0; 
-	  }*/
+	  }
     }
  }
-/*ReFile.close();
+ ReFile.close();
  MaFile.close();
- data_force.close();*/
+ data_force.close();
  /*End of run - Save populations on disk*/
-/* string popsFileName = folderName + "/pops.datout";
+ string popsFileName = folderName + "/pops.datout";
  ofstream pops_output_file(popsFileName.c_str());
   for(int x=0;x<Dx;x++)
    {
@@ -174,5 +171,5 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
 	 pops_output_file << popHeapIn;
        }
    }
-   pops_output_file.close();*/
+   pops_output_file.close();
 }
