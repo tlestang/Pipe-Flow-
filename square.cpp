@@ -16,6 +16,36 @@ void computeSquareBounceBack_FULLSTREAM(double ***fout, double ***fin, int xmin,
     }
 }
 
+void computeSquareBounceBack_TEST(double ***fout, double ***fin, int xmin, int xmax, int ymin, int ymax)
+{
+  for(int x=xmin+1;x<xmax;x++)
+    {
+      fout[x][ymin][7] = fin[x][ymin][5];
+      fout[x][ymin][4] = fin[x][ymin][2];
+      fout[x][ymin][8] = fin[x][ymin][6];
+
+      fout[x][ymax][5] = fin[x][ymax][7];
+      fout[x][ymax][2] = fin[x][ymax][4];
+      fout[x][ymax][6] = fin[x][ymax][8];
+    }
+  for(int y=ymin+1;y<ymax;y++)
+    {
+      fout[xmin][y][6] = fin[xmin][y][8];
+      fout[xmin][y][3] = fin[xmin][y][1];
+      fout[xmin][y][7] = fin[xmin][y][5];
+
+      fout[xmax][y][8] = fin[xmax][y][6];
+      fout[xmax][y][1] = fin[xmax][y][3];
+      fout[xmax][y][5] = fin[xmax][y][7];
+    }
+  fout[xmin][ymin][7] = fin[xmin][ymin][5];
+  fout[xmin][ymax][6] = fin[xmin][ymax][8];
+  fout[xmax][ymax][5] = fin[xmax][ymax][7];
+  fout[xmax][ymin][8] = fin[xmax][ymin][6];
+}
+
+      
+
 void computeSquareBounceBack_SURFACE(double ***f, int xmin, int xmax, int ymin, int ymax)
 {
   /*Bounce Back on the wet square surface, considering that the square is full of nonfluid matter.

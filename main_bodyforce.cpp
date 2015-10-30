@@ -101,7 +101,7 @@ int main()
       streamingAndCollisionComputeMacroBodyForce(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau, beta);
       /* --- Boundary conditions --- */
       computeDomainNoSlipWalls_BB(popHeapOut, popHeapIn, Dx, Dy);
-      computeSquareBounceBack_FULLSTREAM(popHeapOut, popHeapIn, xmin, xmax, ymin, ymax);
+      computeSquareBounceBack_TEST(popHeapOut, popHeapIn, xmin, xmax, ymin, ymax);
       /*Swap populations*/
       temp = popHeapIn;
       popHeapIn = popHeapOut;
@@ -141,7 +141,7 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
       /*Collision and streaming - Macroscopic fields*/
             streamingAndCollisionComputeMacroBodyForce(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau, beta);
       computeDomainNoSlipWalls_BB(popHeapOut, popHeapIn, Dx, Dy);
-      computeSquareBounceBack_FULLSTREAM(popHeapOut, popHeapIn, xmin, xmax, ymin, ymax);
+      computeSquareBounceBack_TEST(popHeapOut, popHeapIn, xmin, xmax, ymin, ymax);
 
       /*Swap populations*/
       temp = popHeapIn;
