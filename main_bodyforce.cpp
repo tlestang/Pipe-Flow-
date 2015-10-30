@@ -50,7 +50,17 @@ int main()
   double ***popHeapIn, ***popHeapOut, ***uFieldHeap, ***temp;
   double **rhoHeap;
 
-
+  /* --- | Create parameters file | --- */
+  string openParamFile = folderName + "/parameters.datout";
+  ofstream param;
+  param.open(openParamFile.c_str());
+  param << "Number of timesteps : " <<numberOfTransientSteps << " + " <<  nbOfChunks << "X" << nbOfTimeSteps << endl;
+  param << "L : "  << Lx << endl;
+  param << "Dx : " << Dx << endl;
+  param << "Dy : " << Dy << endl;
+  param << "tau : " << tau << endl;
+  param << "beta : " << beta << endl;
+  param.close();
 
 
   /* ---- | Allocate populations and fields | --- */
@@ -162,6 +172,7 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
  MaFile.close();
  data_force.close();
  /*End of run - Save populations on disk*/
+ /*and complete parameters file*/
  string popsFileName = folderName + "/pops.datout";
  ofstream pops_output_file(popsFileName.c_str());
   for(int x=0;x<Dx;x++)
