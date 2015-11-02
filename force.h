@@ -1,1 +1,1 @@
-double computeForceOnSquare(double***, int, int, int, int);
+double computeForceOnSquare(double***, int, int, int, int, double);

@@ -40,8 +40,9 @@ int main()
   int Dy=4*Lx, Dx=2*Dy; //Dimensions of grid
   int xmin = (Dx-1)/2; int xmax = xmin+Lx;
   int ymin = Dy/2 - Ly/2; int ymax = ymin + Ly;
-    double Ma;   //Mach number
+  double Ma;   //Mach number
   double nu = ot*(tau-0.5);
+  double omega = 1.0/tau;
   //----------- Misc ----------
   double uxSum = 0.0, uxMean;
   double F; int tt=0;
@@ -151,7 +152,7 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
       /*Compute and Write force on disk*/
       if(lbTimeStepCount%facquForce==0)
       {
-	F = computeForceOnSquare(popHeapIn, xmax, xmin, ymax, ymin);
+	F = computeForceOnSquare(popHeapIn, xmax, xmin, ymax, ymin, omega);
 	data_force << F << endl;
 	}
       /*Compute Reynolds number*/

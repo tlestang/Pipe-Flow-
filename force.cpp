@@ -1,7 +1,7 @@
 #include <iostream>
 using namespace std;
 
-double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin)
+double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin, double omega)
 {
 
   double ot = 1./3.;
@@ -13,6 +13,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin)
   double rho_, ux, uy, Pi_xx, Pi_xy;
   double fneq, ftemp, feq;
   double totalForce;
+  double coeff_force = 1.0-.5*omega;
   
   /*West side*/
   /*Compute Pi_xx*/
@@ -43,7 +44,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin)
 	  Pi_xx += fneq*e[k][0]*e[k][0];
 	}
       /*Compute force*/
-      fWest += -rho_*ot + Pi_xx;
+      fWest += rho_*ot + coeff_force*Pi_xx;
     }
 
   /*East side*/
@@ -73,7 +74,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin)
 	  fneq = f[x0][y][k] - feq;
 	  Pi_xx += fneq*e[k][0]*e[k][0];
 	}
-      fEast += rho_*ot - Pi_xx;
+      fEast += - rho_*ot - coeff_force*Pi_xx;
     }
 
   /*North side*/
@@ -103,7 +104,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin)
 	  fneq = f[x][y0][k] - feq;
 	  Pi_xy += fneq*e[k][0]*e[k][1];
 	}
-      fNorth += Pi_xy;
+      fNorth += - coeff_force*Pi_xy;
     }
 
   /*South side*/
@@ -133,7 +134,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin)
 	  fneq = f[x][y0][k] - feq;
 	  Pi_xy += fneq*e[k][0]*e[k][1];
 	}
-      fSouth += -Pi_xy;
+      fSouth += + coeff_force*Pi_xy;
     }
 
   totalForce = fWest + fEast + fNorth + fSouth;
