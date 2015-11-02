@@ -49,7 +49,11 @@ int main()
   /*Populations and macroscopic fields*/
   double ***popHeapIn, ***popHeapOut, ***uFieldHeap, ***temp;
   double **rhoHeap;
-
+  /* --- | Create folder for storing data | ---  */
+  string instru = "mkdir " + folderName;
+  system(instru.c_str());
+  instru = "mkdir " + folderName + "/vtk_fluid/";
+  system(instru.c_str());
   /* --- | Create parameters file | --- */
   string openParamFile = folderName + "/parameters.datout";
   ofstream param;
@@ -110,12 +114,8 @@ int main()
 
 
 
-  /*Create folder for storing data */
-  string instru = "mkdir " + folderName;
-  system(instru.c_str());
-  instru = "mkdir " + folderName + "/vtk_fluid/";
-  system(instru.c_str());
-  /*Open output file for force*/
+
+  /*Open output files for Reynolds, Mach and force*/
   string openReFile = folderName + "/re_t.datout";
   string openMaFile = folderName + "/ma_t.datout";
   string openForceFile = folderName + "/data_force.datout";

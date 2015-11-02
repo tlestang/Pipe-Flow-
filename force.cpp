@@ -18,7 +18,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin)
   /*Compute Pi_xx*/
   x0 = xmin;
   fWest = 0.0;
-  for(int y=ymin;y<ymax;y++)
+  for(int y=ymin;y<ymax+1;y++)
     {
       /*Compute local macro. fields*/
       rho_ = 0.0; ux = 0.0; uy = 0.0;
@@ -49,7 +49,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin)
   /*East side*/
   x0 = xmax;
   fEast = 0.0;
-  for(int y=ymin;y<ymax;y++)
+  for(int y=ymin;y<ymax+1;y++)
     {
       /*Compute local macro. fields*/
       rho_ = 0.0; ux = 0.0; uy = 0.0;
@@ -79,7 +79,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin)
   /*North side*/
   y0 = ymax;
   fNorth = 0.0;
-  for(int x=xmin;x<xmax;x++)
+  for(int x=xmin;x<xmax+1;x++)
     {
       /*Compute local macro. fields*/
       rho_ = 0.0; ux = 0.0; uy = 0.0;
@@ -109,7 +109,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin)
   /*South side*/
   y0 = ymin;
   fSouth = 0.0;
-  for(int x=xmin;x<xmax;x++)
+  for(int x=xmin;x<xmax+1;x++)
     {
       rho_ = 0.0; ux = 0.0; uy = 0.0;
       /*Compute local macro. fields*/
