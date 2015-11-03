@@ -44,6 +44,7 @@ int main()
   double nu = ot*(tau-0.5);
   double omega = 1.0/tau;
   //----------- Misc ----------
+  double w[9]={4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0};
   double uxSum = 0.0, uxMean;
   double F; int tt=0;
   int dummy, dummy2;
@@ -143,7 +144,17 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
             streamingAndCollisionComputeMacroBodyForce(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau, beta);
       computeDomainNoSlipWalls_BB(popHeapOut, popHeapIn, Dx, Dy);
       computeSquareBounceBack_TEST(popHeapOut, popHeapIn, xmin, xmax, ymin, ymax);
-
+      /*Reset square nodes to equilibrium*/
+      for(int x=xmin+1;x<xmax;x++)
+	{
+	  for(int y=ymin+1;y<ymax;y++)
+	    {
+	      for(int k=0;k<9;k++)
+		{
+		  popHeapOut[x][y][k] = w[k];
+		}
+	    }
+	}
       /*Swap populations*/
       temp = popHeapIn;
       popHeapIn = popHeapOut;
