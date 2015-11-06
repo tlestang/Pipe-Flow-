@@ -21,7 +21,7 @@ int main()
   int nbOfChunks, nbOfTimeSteps, numberOfTransientSteps, Lx, Ly;
   int facquVtk, facquRe, facquForce;
   double tau, beta;
-  string folderName;
+  string folderName, inputPopsFileName;
   /*Reads input file*/
   ifstream input_file("input.datin");
   input_file >> nbOfChunks;
@@ -31,6 +31,7 @@ int main()
   input_file >> tau;
   input_file >> beta;
   input_file >> folderName;
+  input_file >> inputPopsFileName;
   input_file >> facquVtk;
   input_file >> facquRe;
   input_file >> facquForce;
@@ -93,11 +94,35 @@ int main()
 	}
     }
 
-    /*Initialization of population to equilibrium value*/
+
+  if(inputPopsFileName != "0")
+    {
+      ifstream popFile(inputPopsFileName.c_str());
+      cout << "Initialized populations taken from " << inputPopsFileName << endl;
+      for(int x=0;x<Dx;x++)
+	{
+	  for(int y=0;y<Dy;y++)
+	    {
+	      for(int k=0;k<9;k++)
+		{
+		  popFile >> popHeapIn[x][y][k];
+		}
+	    }
+	}
+      popFile.close();
+    }
+  else
+    {
+  /*Initialization of population to equilibrium value*/
+      cout << "Initializing pops to equilibrium value" << endl;
   initializePopulations(popHeapIn, Dx, Dy);
   initializeFields(rhoHeap, uFieldHeap, Dx, Dy);
+    }
+  
   /*Initialize counters*/
   dummy = 0; dummy2 = 0;
+
+  
   
   /*Transient regime*/
       for (int lbTimeStepCount=0; lbTimeStepCount<numberOfTransientSteps;lbTimeStepCount++)
@@ -141,7 +166,7 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
 	tt++;
 	}
       /*Collision and streaming - Macroscopic fields*/
-            streamingAndCollisionComputeMacroBodyForce(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau, beta);
+      streamingAndCollisionComputeMacroBodyForce(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau, beta);
       computeDomainNoSlipWalls_BB(popHeapOut, popHeapIn, Dx, Dy);
       computeSquareBounceBack_TEST(popHeapOut, popHeapIn, xmin, xmax, ymin, ymax);
       /*Reset square nodes to equilibrium*/
@@ -191,7 +216,10 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
    {
      for(int y=0;y<Dy;y++)
        {
-	 pops_output_file << popHeapIn;
+	 for(int k=0;k<9;k++)
+	   {
+	     pops_output_file << popHeapIn[x][y][k] << endl;
+	   }
        }
    }
    pops_output_file.close();
