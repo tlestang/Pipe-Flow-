@@ -26,7 +26,6 @@ int main()
   ifstream input_file("input.datin");
   input_file >> nbOfChunks;
   input_file >> nbOfTimeSteps;
-  input_file >> numberOfTransientSteps;
   input_file >> Lx; Ly = Lx;
   input_file >> tau;
   input_file >> beta;
@@ -61,7 +60,7 @@ int main()
   string openParamFile = folderName + "/parameters.datout";
   ofstream param;
   param.open(openParamFile.c_str());
-  param << "Number of timesteps : " <<numberOfTransientSteps << " + " <<  nbOfChunks << "X" << nbOfTimeSteps << endl;
+  param << "Number of timesteps : " << nbOfChunks << "X" << nbOfTimeSteps << endl;
   param << "L : "  << Lx << endl;
   param << "Dx : " << Dx << endl;
   param << "Dy : " << Dy << endl;
@@ -121,26 +120,6 @@ int main()
   
   /*Initialize counters*/
   dummy = 0; dummy2 = 0;
-
-  
-  
-  /*Transient regime*/
-      for (int lbTimeStepCount=0; lbTimeStepCount<numberOfTransientSteps;lbTimeStepCount++)
-    {
-      if(lbTimeStepCount%(numberOfTransientSteps/100)==0){dummy++; cout << "Transient regime : " << dummy << "%" <<  endl;}
-      /*Collision and streaming - Macroscopic fields*/
-      streamingAndCollisionComputeMacroBodyForce(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau, beta);
-      /* --- Boundary conditions --- */
-      computeDomainNoSlipWalls_BB(popHeapOut, popHeapIn, Dx, Dy);
-      computeSquareBounceBack_TEST(popHeapOut, popHeapIn, xmin, xmax, ymin, ymax);
-      /*Swap populations*/
-      temp = popHeapIn;
-      popHeapIn = popHeapOut;
-      popHeapOut = temp;
-    }
-
-
-
 
   /*Open output files for Reynolds, Mach and force*/
   string openReFile = folderName + "/re_t.datout";
