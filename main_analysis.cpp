@@ -36,10 +36,11 @@ int main()
   input_file >> facquForce;
   input_file.close();
   /*Compute or define other parameters*/
-  double cs = 1./sqrt(3); double rho0 = 1.0;
-  int Dy=4*Lx, Dx=2*Dy; //Dimensions of grid
-  int xmin = (Dx-1)/2; int xmax = xmin+Lx;
+  int Dy = 4*Ly, Dx = 2*Dy;
+  int xmin = (Dx-1)/2; int xmax = xmin + Lx;
   int ymin = Dy/2 - Ly/2; int ymax = ymin + Ly;
+  double cs = 1./sqrt(3); double rho0 = 1.0;
+
   double Ma;   //Mach number
   double nu = ot*(tau-0.5);
   double omega = 1.0/tau;
