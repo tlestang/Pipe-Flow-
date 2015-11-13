@@ -36,9 +36,9 @@ int main()
   input_file >> facquForce;
   input_file.close();
   /*Compute or define other parameters*/
-  int Dy = 4*Ly, Dx = 2*Dy;
+  int Dy = 4*Ly + 1, Dx = 2*Dy + 1;
   int xmin = (Dx-1)/2; int xmax = xmin + Lx;
-  int ymin = Dy/2 - Ly/2; int ymax = ymin + Ly;
+  int ymin = (Dy-1)/2 - Ly/2; int ymax = ymin + Ly;
   double cs = 1./sqrt(3); double rho0 = 1.0;
 
   double Ma;   //Mach number
@@ -179,7 +179,7 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
 	      uxSum += uFieldHeap[Dx/4][y][0];
 	    }
 	  uxMean = uxSum/Dy;
-	  ReFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << (2.0*uxMean*(Ly-1))/nu << endl;
+	  ReFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << (uxMean*Ly)/nu << endl;
 	  MaFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << uxMean/cs << endl;
 	  uxSum=0.0; 
 	  }

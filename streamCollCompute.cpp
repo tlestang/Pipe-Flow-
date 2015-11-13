@@ -24,7 +24,7 @@ void streamingAndCollisionComputeMacroBodyForce
 	      ux += ftemp*c[k][0];
 	      uy += ftemp*c[k][1];
 	    }
-	  ux = ux/rhoDum + /*Influence of the force*/0.5*beta; uy /= rhoDum;
+	  ux = ux/rhoDum + /*Influence of the force*/0.5*beta/rhoDum; uy /= rhoDum;
 	  u2 = -1.5*(ux*ux + uy*uy);
 	  for (int k=0;k<9;k++)
 	    {
