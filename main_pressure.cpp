@@ -21,7 +21,6 @@ int main()
   int nbOfChunks, nbOfTimeSteps, numberOfTransientSteps, Lx, Ly;
   int facquVtk, facquRe, facquForce;
   double tau, beta;
-  double Ma;   //Mach number
   string folderName, inputPopsFileName;
   /*Reads input file*/
   ifstream input_file("input.datin");
@@ -29,7 +28,7 @@ int main()
   input_file >> nbOfTimeSteps;
   input_file >> Lx; Ly = Lx;
   input_file >> tau;
-  input_file >> Ma;
+  input_file >> beta;
   input_file >> folderName;
   input_file >> inputPopsFileName;
   input_file >> facquVtk;
@@ -41,12 +40,10 @@ int main()
   int xmin = (Dx-1)/2; int xmax = xmin + Lx;
   int ymin = (Dy-1)/2 - Ly/2; int ymax = ymin + Ly;
   double cs = 1./sqrt(3); double rho0 = 1.0;
-  double u0 = cs*cs*Ma;
+
+  double Ma;   //Mach number
   double nu = ot*(tau-0.5);
   double omega = 1.0/tau;
-  beta = 8*nu*u0/((Dy-1)/2)/((Dy-1)/2);
-  
-
   //----------- Misc ----------
   double w[9]={4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0};
   double uxSum = 0.0, uxMean;
@@ -150,7 +147,8 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
 	}
       /*Collision and streaming - Macroscopic fields*/
       //streamingAndCollisionComputeMacroBodyForce(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau, beta);
-      streamingAndCollisionComputeMacroBodyForce(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau, beta);
+      streamingAndCollisionComputeMacro(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau);
+      computeDomainInletOutlet(popHeapOut, Dx, Dy, beta);
       computeDomainNoSlipWalls_BB(popHeapOut, popHeapIn, Dx, Dy);
       computeSquareBounceBack_TEST(popHeapOut, popHeapIn, xmin, xmax, ymin, ymax);
       /*Reset square nodes to equilibrium*/
