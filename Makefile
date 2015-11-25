@@ -1,16 +1,18 @@
-CXXFLAGS=-O3
+CXXFLAGS=-O3 
 
 bodyforce: main_bodyforce.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
-	g++ -o run_bodyforce main_bodyforce.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
+	g++ -o run_bodyforce main_bodyforce.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o 
 
 analysis: main_analysis.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk_mean.o
 	g++ -o run_analysis main_analysis.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk_mean.o
 
-
-#pressure:
-	#echo 'ERROR : pressure driven flow unavailable at the moment'
 pressure: main_pressure.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o domain_InletOutlet.o square.o force.o write_vtk.o
 	g++ -o run_pressure main_pressure.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o domain_InletOutlet.o square.o force.o write_vtk.o
+
+benchmark: main_benchmark.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
+	g++ -o run_benchmark main_benchmark.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o 
+
+# --- MAIN FUNCTIONS
 
 main_bodyforce.o: main_bodyforce.cpp
 	g++ -o main_bodyforce.o -c main_bodyforce.cpp $(CXXFLAGS)
@@ -18,6 +20,11 @@ main_analysis.o: main_bodyforce.cpp
 	g++ -o main_analysis.o -c main_analysis.cpp $(CXXFLAGS)
 main_pressure.o: main_pressure.cpp
 	g++ -o main_pressure.o -c main_pressure.cpp $(CXXFLAGS)
+main_benchmark.o: main_benchmark.cpp
+	g++ -o main_benchmark.o -c main_benchmark.cpp $(CXXFLAGS)
+
+# --- CORE FUNCTIONS ---
+
 initialize_lattice_arrays.o: initialize_lattice_arrays.cpp
 	g++ -o initialize_lattice_arrays.o -c initialize_lattice_arrays.cpp $(CXXFLAGS)
 streamCollCompute.o: streamCollCompute.cpp
