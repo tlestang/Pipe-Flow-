@@ -85,11 +85,12 @@ int main()
 //Variables for performance evaluation
 struct timeval start, end;
                                   /* --- START LBM --- */
-  
+
+ //TICK TIMER
+      gettimeofday(&start,NULL);
   for (int lbTimeStepCount=0; lbTimeStepCount<nbOfTimeSteps;lbTimeStepCount++)
     {
-      //TICK TIMER
-      gettimeofday(&start,NULL);
+      
       
       /*Collision and streaming - Macroscopic fields*/
       streamingAndCollisionComputeMacroBodyForce(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau, beta);
@@ -111,8 +112,9 @@ struct timeval start, end;
       popHeapIn = popHeapOut;
       popHeapOut = temp;
       
-      /*Tick Timer*/
-      gettimeofday(&end,NULL);
     }
-  cout << (end.tv_sec - start.tv_sec)*1e6 + (end.tv_usec - start.tv_usec) << endl;
+  
+  gettimeofday(&end,NULL);
+  double t = (end.tv_sec - start.tv_sec)*1e6 + (end.tv_usec - start.tv_usec);
+  cout << t/nbOfTimeSteps << endl;
 }

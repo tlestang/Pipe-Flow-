@@ -4,6 +4,7 @@
 #include <sstream>
 #include <cstdlib>
 #include "stdio.h"
+#include <sys/time.h>
 
 #include "initialize_lattice_arrays.h"
 #include "streamCollCompute.h"
@@ -135,14 +136,18 @@ int main()
   data_force.open(openForceFile.c_str());
 
   /*Start LBM*/
+  //Variables for performance evaluation
+struct timeval start, end;
+
+       gettimeofday(&start,NULL);
 for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
 {
   if(chunkID%(nbOfChunks/100)==0){dummy2++; cout<<"Running : " << dummy2<<"%"<<endl;/*\r"; fflush(stdout);*/}
 
     for (int lbTimeStepCount=0; lbTimeStepCount<nbOfTimeSteps;lbTimeStepCount++)
     {
-      /*if(lbTimeStepCount%(nbOfTimeSteps/100)==0)
-	dummy++; cout<<dummy<<"%\r"; fflush(stdout);*/
+      // if(lbTimeStepCount%(nbOfTimeSteps/100)==0)
+      // 	dummy2++; cout<<dummy2<<"%\r"; fflush(stdout);
       if(lbTimeStepCount%facquVtk==0)
 	{
 	write_fluid_vtk(tt, Dx, Dy, rhoHeap, uFieldHeap, folderName.c_str());
@@ -184,11 +189,16 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
 	    }
 	  uxMean = uxSum/Dy;
 	  ReFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << (uxMean*Ly)/nu << endl;
-	  MaFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << uxMean/cs << endl;
+	  //MaFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << uxMean/cs << endl;
 	  uxSum=0.0; 
 	  }
     }
  }
+ 
+ gettimeofday(&end,NULL);
+  double t = (end.tv_sec - start.tv_sec)*1e6 + (end.tv_usec - start.tv_usec);
+  cout << t/(nbOfTimeSteps*nbOfChunks) << endl;
+  
  ReFile.close();
  MaFile.close();
  data_force.close();
