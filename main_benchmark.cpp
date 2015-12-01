@@ -116,5 +116,6 @@ struct timeval start, end;
   
   gettimeofday(&end,NULL);
   double t = (end.tv_sec - start.tv_sec)*1e6 + (end.tv_usec - start.tv_usec);
-  cout << t/nbOfTimeSteps << endl;
+  cout << "Average time per ts in us : " << t/nbOfTimeSteps << endl;
+  cout << "Total runtime in s : " << t/(1e6) << endl;
 }
