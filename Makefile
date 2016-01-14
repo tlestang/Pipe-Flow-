@@ -3,6 +3,9 @@ CXXFLAGS=-O3
 bodyforce: main_bodyforce.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
 	g++ -o run_bodyforce main_bodyforce.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o 
 
+prog: main_prog.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
+	g++ -o run_prog main_prog.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o 
+
 analysis: main_analysis.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk_mean.o
 	g++ -o run_analysis main_analysis.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk_mean.o
 
@@ -20,6 +23,8 @@ main_analysis.o: main_bodyforce.cpp
 	g++ -o main_analysis.o -c main_analysis.cpp $(CXXFLAGS)
 main_pressure.o: main_pressure.cpp
 	g++ -o main_pressure.o -c main_pressure.cpp $(CXXFLAGS)
+main_prog.o: main_prog.cpp
+	g++ -o main_prog.o -c main_prog.cpp $(CXXFLAGS)
 main_benchmark.o: main_benchmark.cpp
 	g++ -o main_benchmark.o -c main_benchmark.cpp $(CXXFLAGS)
 
@@ -44,5 +49,5 @@ write_vtk_mean.o: write_vtk_mean.cpp
 clean:
 	rm -rf *.o
 mrproper: clean
-	rm -rf bodyforce; rm -rf pressure; rm -rf analysis;
+	rm -rf bodyforce; rm -rf pressure; rm -rf analysis; rm -rf prog;
 

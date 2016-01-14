@@ -3,8 +3,15 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include <malloc.h>
+#include <unistd.h>
 #include "stdio.h"
 #include <sys/time.h>
+
+#ifndef __global__
+#define __global__
+#include "global.h"
+#endif
 
 #include "initialize_lattice_arrays.h"
 #include "streamCollCompute.h"
@@ -13,6 +20,10 @@
 #include "write_vtk.h"
 
 using namespace std;
+
+int e[9][2] = {{0,0}, {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1}};
+double w[9]={4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0};
+int Dx, Dy, xmin, xmax, ymin, ymax;
 
 int main()
 {
@@ -54,8 +65,7 @@ int main()
   double F; int tt=0;
   int dummy, dummy2;
   /*Populations and macroscopic fields*/
-  double ***popHeapIn, ***popHeapOut, ***uFieldHeap, ***temp;
-  double **rhoHeap;
+  double *fin, *fout, *rho, *ux, *uy, *temp;
   /* --- | Create folder for storing data | ---  */
   string instru = "mkdir " + folderName;
   system(instru.c_str());
@@ -76,27 +86,33 @@ int main()
 
   /* ---- | Allocate populations and fields | --- */
 
-  popHeapIn = new double**[Dx]; popHeapOut = new double**[Dx];
-  for (int i=0;i<Dx;i++)
-    {
-      popHeapIn[i] = new double*[Dy];
-      popHeapOut[i] = new double*[Dy];
-      for(int j=0;j<Dy;j++)
-	{
-	  popHeapOut[i][j] = new double[9];
-	  popHeapIn[i][j] = new double[9];
-	}
-    }
-  rhoHeap = new double*[Dx]; uFieldHeap = new double**[Dx];
-  for(int i=0;i<Dx;i++)
-    {
-      rhoHeap[i] = new double[Dy];
-      uFieldHeap[i] = new double*[Dy];
-      for (int j=0;j<Dy;j++)
-	{
-	  uFieldHeap[i][j] = new double[2];
-	}
-    }
+  fin = (double *) memalign(getpagesize(), Dx*Dy*9*sizeof(double));
+  fout = (double *) memalign(getpagesize(), Dx*Dy*9*sizeof(double));
+  rho = (double *) memalign(getpagesize(), Dx*Dy*sizeof(double));
+  ux = (double *) memalign(getpagesize(), Dx*Dy*sizeof(double));
+  uy = (double *) memalign(getpagesize(), Dx*Dy*sizeof(double));
+  
+  // popHeapIn = new double**[Dx]; popHeapOut = new double**[Dx];
+  // for (int i=0;i<Dx;i++)
+  //   {
+  //     popHeapIn[i] = new double*[Dy];
+  //     popHeapOut[i] = new double*[Dy];
+  //     for(int j=0;j<Dy;j++)
+  // 	{
+  // 	  popHeapOut[i][j] = new double[9];
+  // 	  popHeapIn[i][j] = new double[9];
+  // 	}
+  //   }
+  // rhoHeap = new double*[Dx]; uFieldHeap = new double**[Dx];
+  // for(int i=0;i<Dx;i++)
+  //   {
+  //     rhoHeap[i] = new double[Dy];
+  //     uFieldHeap[i] = new double*[Dy];
+  //     for (int j=0;j<Dy;j++)
+  // 	{
+  // 	  uFieldHeap[i][j] = new double[2];
+  // 	}
+  //   }
 
 
   if(inputPopsFileName != "0")
@@ -109,7 +125,7 @@ int main()
 	    {
 	      for(int k=0;k<9;k++)
 		{
-		  popFile >> popHeapIn[x][y][k];
+		  popFile >> fin[IDX(x,y,k)];
 		}
 	    }
 	}
@@ -119,8 +135,8 @@ int main()
     {
   /*Initialization of population to equilibrium value*/
       cout << "Initializing pops to equilibrium value" << endl;
-  initializePopulations(popHeapIn, Dx, Dy);
-  initializeFields(rhoHeap, uFieldHeap, Dx, Dy);
+  initializePopulations(fin, Dx, Dy);
+  initializeFields(fin, rho, ux, uy, Dx, Dy);
     }
   
   /*Initialize counters*/
@@ -150,14 +166,14 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
       // 	dummy2++; cout<<dummy2<<"%\r"; fflush(stdout);
       if(lbTimeStepCount%facquVtk==0)
 	{
-	write_fluid_vtk(tt, Dx, Dy, rhoHeap, uFieldHeap, folderName.c_str());
-	tt++;
+	  write_fluid_vtk(tt, Dx, Dy, rho, ux, uy, folderName.c_str());
+	  tt++;
 	}
       /*Collision and streaming - Macroscopic fields*/
       //streamingAndCollisionComputeMacroBodyForce(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau, beta);
-      streamingAndCollisionComputeMacroBodyForce(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau, beta);
-      computeDomainNoSlipWalls_BB(popHeapOut, popHeapIn, Dx, Dy);
-      computeSquareBounceBack_TEST(popHeapOut, popHeapIn, xmin, xmax, ymin, ymax);
+      streamingAndCollisionComputeMacroBodyForce(fin, fout, rho, ux, uy, beta, tau);
+      computeDomainNoSlipWalls_BB(fout, fin);
+      computeSquareBounceBack_TEST(fout, fin);
       /*Reset square nodes to equilibrium*/
       for(int x=xmin+1;x<xmax;x++)
 	{
@@ -165,19 +181,19 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
 	    {
 	      for(int k=0;k<9;k++)
 		{
-		  popHeapOut[x][y][k] = w[k];
+		  fout[IDX(x,y,k)] = w[k];
 		}
 	    }
 	}
       /*Swap populations*/
-      temp = popHeapIn;
-      popHeapIn = popHeapOut;
-      popHeapOut = temp;
+      temp = fin;
+      fin = fout;
+      fout = temp;
 
       /*Compute and Write force on disk*/
       if(lbTimeStepCount%facquForce==0)
       {
-	F = computeForceOnSquare(popHeapIn, xmax, xmin, ymax, ymin, omega);
+	F = computeForceOnSquare(fin, omega);
 	data_force << F << endl;
 	}
       /*Compute Reynolds number*/
@@ -185,7 +201,7 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
 	{      
 	  for(int y=0;y<Dy;y++)
 	    {
-	      uxSum += uFieldHeap[Dx/4][y][0];
+	      uxSum += ux[idx(Dx/4, y)];
 	    }
 	  uxMean = uxSum/Dy;
 	  ReFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << (uxMean*Ly)/nu << endl;
@@ -212,7 +228,7 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
        {
 	 for(int k=0;k<9;k++)
 	   {
-	     pops_output_file << popHeapIn[x][y][k] << endl;
+	     pops_output_file << fin[IDX(x,y,k)] << endl;
 	   }
        }
    }

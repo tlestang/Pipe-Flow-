@@ -1,12 +1,14 @@
 #include <iostream>
-using namespace std;
 
-double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin, double omega)
+#ifndef __global__
+#define __global__
+#include "global.h"
+#endif
+
+double computeForceOnSquare(double *f, double omega)
 {
 
   double ot = 1./3.;
-  double w[9]={4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0};
-  int e[9][2] = {{0,0}, {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1}};
   int x0, y0;
   double eu, eueu, u2;
   double fEast, fWest, fNorth, fSouth;
@@ -25,7 +27,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin,
       rho_ = 0.0; ux = 0.0; uy = 0.0;
       for(int k=0;k<9;k++)
 	{
-	  ftemp = f[x0][y][k];
+	  ftemp = f[IDX(x0,y,k)];
 	  rho_ += ftemp;
 	  ux += ftemp*e[k][0];
 	  uy += ftemp*e[k][1];
@@ -40,7 +42,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin,
 	  eu = e[k][0]*ux + e[k][1]*uy;
 	  eueu = 4.5*eu*eu;
 	  feq = w[k]*rho_*(1.0+3.0*eu+eueu+u2);
-	  fneq = f[x0][y][k] - feq;
+	  fneq = f[IDX(x0,y,k)] - feq;
 	  Pi_xx += fneq*e[k][0]*e[k][0];
 	}
       /*Compute force*/
@@ -56,7 +58,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin,
       rho_ = 0.0; ux = 0.0; uy = 0.0;
       for(int k=0;k<9;k++)
 	{
-	  ftemp = f[x0][y][k];
+	  ftemp = f[IDX(x0,y,k)];
 	  rho_ += ftemp;
 	  ux += ftemp*e[k][0];
 	  uy += ftemp*e[k][1];
@@ -71,7 +73,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin,
 	  eu = e[k][0]*ux + e[k][1]*uy;
 	  eueu = 4.5*eu*eu;
 	  feq = w[k]*rho_*(1.0+3.0*eu+eueu+u2);
-	  fneq = f[x0][y][k] - feq;
+	  fneq = f[IDX(x0,y,k)] - feq;
 	  Pi_xx += fneq*e[k][0]*e[k][0];
 	}
       fEast += - rho_*ot - coeff_force*Pi_xx;
@@ -86,7 +88,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin,
       rho_ = 0.0; ux = 0.0; uy = 0.0;
       for(int k=0;k<9;k++)
 	{
-	  ftemp = f[x][y0][k];
+	  ftemp = f[IDX(x,y0,k)];
 	  rho_ += ftemp;
 	  ux += ftemp*e[k][0];
 	  uy += ftemp*e[k][1];
@@ -101,7 +103,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin,
 	  eu = e[k][0]*ux + e[k][1]*uy;
 	  eueu = 4.5*eu*eu;
 	  feq = w[k]*rho_*(1.0+3.0*eu+eueu+u2);
-	  fneq = f[x][y0][k] - feq;
+	  fneq = f[IDX(x,y0,k)] - feq;
 	  Pi_xy += fneq*e[k][0]*e[k][1];
 	}
       fNorth += - coeff_force*Pi_xy;
@@ -116,7 +118,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin,
       /*Compute local macro. fields*/
       for(int k=0;k<9;k++)
 	{
-	  ftemp = f[x][y0][k];
+	  ftemp = f[IDX(x,y0,k)];
 	  rho_ += ftemp;
 	  ux += ftemp*e[k][0];
 	  uy += ftemp*e[k][1];
@@ -131,7 +133,7 @@ double computeForceOnSquare(double ***f, int xmax, int xmin, int ymax, int ymin,
 	  eu = e[k][0]*ux + e[k][1]*uy;
 	  eueu = 4.5*eu*eu;
 	  feq = w[k]*rho_*(1.0+3.0*eu+eueu+u2);
-	  fneq = f[x][y0][k] - feq;
+	  fneq = f[IDX(x,y0,k)] - feq;
 	  Pi_xy += fneq*e[k][0]*e[k][1];
 	}
       fSouth += + coeff_force*Pi_xy;

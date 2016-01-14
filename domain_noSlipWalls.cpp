@@ -1,18 +1,23 @@
-void computeDomainNoSlipWalls_BB(double ***fout, double ***fin, int Dx, int Dy)
+#ifndef __global__
+#define __global__
+#include "global.h"
+#endif
+
+void computeDomainNoSlipWalls_BB(double *fout, double *fin)
 {
   /*Apply halfway BB to north and south wall, including corners*/
   int y0;
   for(int x=0;x<Dx;x++)
     {
       /*North boundary*/
-      fout[x][Dy-1][4] = fin[x][Dy-1][2];
-      fout[x][Dy-1][8] = fin[x][Dy-1][6];
-      fout[x][Dy-1][7] = fin[x][Dy-1][5];
+      fout[IDX(x,Dy-1,4)] = fin[IDX(x,Dy-1,2)];
+      fout[IDX(x,Dy-1,8)] = fin[IDX(x,Dy-1,6)];
+      fout[IDX(x,Dy-1,7)] = fin[IDX(x,Dy-1,5)];
 
       /*South boundary*/
-      fout[x][0][2] = fin[x][0][4];
-      fout[x][0][5] = fin[x][0][7];
-      fout[x][0][6] = fin[x][0][8];
+      fout[IDX(x,0,2)] = fin[IDX(x,0,4)];
+      fout[IDX(x,0,5)] = fin[IDX(x,0,7)];
+      fout[IDX(x,0,6)] = fin[IDX(x,0,8)];
     }
 }
 
