@@ -12,4 +12,4 @@ extern int Dx;
 extern int Dy;
 extern int xmin, xmax, ymin, ymax;
 extern double w[9];
-extern int e[9][2];
+extern int c[9][2];

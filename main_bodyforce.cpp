@@ -21,7 +21,7 @@
 
 using namespace std;
 
-int e[9][2] = {{0,0}, {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1}};
+int c[9][2] = {{0,0}, {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1}};
 double w[9]={4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0};
 int Dx, Dy, xmin, xmax, ymin, ymax;
 
@@ -31,7 +31,7 @@ int main()
   double entry;
   /*Parameters for LB simulation*/
   int nbOfChunks, nbOfTimeSteps, numberOfTransientSteps, Lx, Ly;
-  int facquVtk, facquRe, facquForce;
+  int facquVtk, facquRe, facquForce, facquU;
   double tau, beta;
   double Ma;   //Mach number
   string folderName, inputPopsFileName;
@@ -47,9 +47,10 @@ int main()
   input_file >> facquVtk;
   input_file >> facquRe;
   input_file >> facquForce;
+  input_file >> facquU;
   input_file.close();
   /*Compute or define other parameters*/
-  int Dy = 4*Ly + 1, Dx = 2*(Dy-1) + 1;
+  Dy = 4*Ly + 1, Dx = 2*(Dy-1) + 1;
   int xmin = (Dx-1)/2; int xmax = xmin + Lx;
   int ymin = (Dy-1)/2 - Ly/2; int ymax = ymin + Ly;
   double cs = 1./sqrt(3); double rho0 = 1.0;
@@ -60,7 +61,6 @@ int main()
   
 
   //----------- Misc ----------
-  double w[9]={4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0};
   double uxSum = 0.0, uxMean;
   double F; int tt=0;
   int dummy, dummy2;
@@ -82,7 +82,6 @@ int main()
   param << "tau : " << tau << endl;
   param << "beta : " << beta << endl;
   param.close();
-
 
   /* ---- | Allocate populations and fields | --- */
 
@@ -143,13 +142,15 @@ int main()
   dummy = 0; dummy2 = 0;
 
   /*Open output files for Reynolds, Mach and force*/
-  string openReFile = folderName + "/re_t.datout";
-  string openMaFile = folderName + "/ma_t.datout";
+  //string openReFile = folderName + "/re_t.datout";
+  //string openMaFile = folderName + "/ma_t.datout";
   string openForceFile = folderName + "/data_force.datout";
-  ofstream ReFile, MaFile, data_force;
-  ReFile.open(openReFile.c_str());
-  MaFile.open(openMaFile.c_str());
-  data_force.open(openForceFile.c_str());
+  string openuxFile = folderName + "/ux_t.datout";
+  ofstream ReFile, MaFile, forceFile, uxFile;
+  // ReFile.open(openReFile.c_str());
+  // MaFile.open(openMaFile.c_str());
+  uxFile.open(openuxFile.c_str(), ios::binary);
+  forceFile.open(openForceFile.c_str(), ios::binary);
 
   /*Start LBM*/
   //Variables for performance evaluation
@@ -194,20 +195,27 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
       if(lbTimeStepCount%facquForce==0)
       {
 	F = computeForceOnSquare(fin, omega);
-	data_force << F << endl;
+	forceFile.write((char*)&F, sizeof(double));
 	}
-      /*Compute Reynolds number*/
-      if(lbTimeStepCount%facquRe==0)
+
+
+      if(lbTimeStepCount%facquU==0)
 	{      
-	  for(int y=0;y<Dy;y++)
-	    {
-	      uxSum += ux[idx(Dx/4, y)];
-	    }
-	  uxMean = uxSum/Dy;
-	  ReFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << (uxMean*Ly)/nu << endl;
-	  //MaFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << uxMean/cs << endl;
-	  uxSum=0.0; 
-	  }
+	  uxFile.write((char*)&ux[idx(Dx/4,Dy/4)], sizeof(double));
+	}
+      
+      /*Compute Reynolds number*/
+      // if(lbTimeStepCount%facquRe==0)
+      // 	{      
+      // 	  for(int y=0;y<Dy;y++)
+      // 	    {
+      // 	      uxSum += ux[idx(Dx/4, y)];
+      // 	    }
+      // 	  uxMean = uxSum/Dy;
+      // 	  ReFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << (uxMean*Ly)/nu << endl;
+      // 	  //MaFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << uxMean/cs << endl;
+      // 	  uxSum=0.0; 
+      // 	  }
     }
  }
  
@@ -215,9 +223,10 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
   double t = (end.tv_sec - start.tv_sec)*1e6 + (end.tv_usec - start.tv_usec);
   cout << t/(nbOfTimeSteps*nbOfChunks) << endl;
   
- ReFile.close();
- MaFile.close();
- data_force.close();
+ // ReFile.close();
+ // MaFile.close();
+ forceFile.close();
+ uxFile.close();
  /*End of run - Save populations on disk*/
  /*and complete parameters file*/
  string popsFileName = folderName + "/pops.datout";

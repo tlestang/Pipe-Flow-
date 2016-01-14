@@ -29,8 +29,8 @@ double computeForceOnSquare(double *f, double omega)
 	{
 	  ftemp = f[IDX(x0,y,k)];
 	  rho_ += ftemp;
-	  ux += ftemp*e[k][0];
-	  uy += ftemp*e[k][1];
+	  ux += ftemp*c[k][0];
+	  uy += ftemp*c[k][1];
 	}
       uy /= rho_;
       ux /= rho_;
@@ -39,11 +39,11 @@ double computeForceOnSquare(double *f, double omega)
       u2 = -1.5*(ux*ux + uy*uy);
       for(int k=0;k<9;k++)
 	{
-	  eu = e[k][0]*ux + e[k][1]*uy;
+	  eu = c[k][0]*ux + c[k][1]*uy;
 	  eueu = 4.5*eu*eu;
 	  feq = w[k]*rho_*(1.0+3.0*eu+eueu+u2);
 	  fneq = f[IDX(x0,y,k)] - feq;
-	  Pi_xx += fneq*e[k][0]*e[k][0];
+	  Pi_xx += fneq*c[k][0]*c[k][0];
 	}
       /*Compute force*/
       fWest += rho_*ot + coeff_force*Pi_xx;
@@ -60,8 +60,8 @@ double computeForceOnSquare(double *f, double omega)
 	{
 	  ftemp = f[IDX(x0,y,k)];
 	  rho_ += ftemp;
-	  ux += ftemp*e[k][0];
-	  uy += ftemp*e[k][1];
+	  ux += ftemp*c[k][0];
+	  uy += ftemp*c[k][1];
 	}
       uy /= rho_;
       ux /= rho_;
@@ -70,11 +70,11 @@ double computeForceOnSquare(double *f, double omega)
       u2 = -1.5*(ux*ux + uy*uy);
       for(int k=0;k<9;k++)
 	{
-	  eu = e[k][0]*ux + e[k][1]*uy;
+	  eu = c[k][0]*ux + c[k][1]*uy;
 	  eueu = 4.5*eu*eu;
 	  feq = w[k]*rho_*(1.0+3.0*eu+eueu+u2);
 	  fneq = f[IDX(x0,y,k)] - feq;
-	  Pi_xx += fneq*e[k][0]*e[k][0];
+	  Pi_xx += fneq*c[k][0]*c[k][0];
 	}
       fEast += - rho_*ot - coeff_force*Pi_xx;
     }
@@ -90,8 +90,8 @@ double computeForceOnSquare(double *f, double omega)
 	{
 	  ftemp = f[IDX(x,y0,k)];
 	  rho_ += ftemp;
-	  ux += ftemp*e[k][0];
-	  uy += ftemp*e[k][1];
+	  ux += ftemp*c[k][0];
+	  uy += ftemp*c[k][1];
 	}
       uy /= rho_;
       ux /= rho_;
@@ -100,11 +100,11 @@ double computeForceOnSquare(double *f, double omega)
       u2 = -1.5*(ux*ux + uy*uy);
       for(int k=0;k<9;k++)
 	{
-	  eu = e[k][0]*ux + e[k][1]*uy;
+	  eu = c[k][0]*ux + c[k][1]*uy;
 	  eueu = 4.5*eu*eu;
 	  feq = w[k]*rho_*(1.0+3.0*eu+eueu+u2);
 	  fneq = f[IDX(x,y0,k)] - feq;
-	  Pi_xy += fneq*e[k][0]*e[k][1];
+	  Pi_xy += fneq*c[k][0]*c[k][1];
 	}
       fNorth += - coeff_force*Pi_xy;
     }
@@ -120,8 +120,8 @@ double computeForceOnSquare(double *f, double omega)
 	{
 	  ftemp = f[IDX(x,y0,k)];
 	  rho_ += ftemp;
-	  ux += ftemp*e[k][0];
-	  uy += ftemp*e[k][1];
+	  ux += ftemp*c[k][0];
+	  uy += ftemp*c[k][1];
 	}
       uy /= rho_;
       ux /= rho_;
@@ -130,11 +130,11 @@ double computeForceOnSquare(double *f, double omega)
       u2 = -1.5*(ux*ux + uy*uy);
       for(int k=0;k<9;k++)
 	{
-	  eu = e[k][0]*ux + e[k][1]*uy;
+	  eu = c[k][0]*ux + c[k][1]*uy;
 	  eueu = 4.5*eu*eu;
 	  feq = w[k]*rho_*(1.0+3.0*eu+eueu+u2);
 	  fneq = f[IDX(x,y0,k)] - feq;
-	  Pi_xy += fneq*e[k][0]*e[k][1];
+	  Pi_xy += fneq*c[k][0]*c[k][1];
 	}
       fSouth += + coeff_force*Pi_xy;
     }

@@ -31,8 +31,8 @@ void initializeFields(double *fin, double *rho, double *ux, double *uy, int Dx, 
 	    {
 	      f = fin[IDX(x,y,k)];
 	      rho_ += f;
-	      u += f*e[k][0];
-	      v += f*e[k][1];
+	      u += f*c[k][0];
+	      v += f*c[k][1];
 	    }
 	  rho[idx(x,y)] = rho_;
 	  ux[idx(x,y)] = u/rho_;
