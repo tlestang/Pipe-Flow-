@@ -21,7 +21,7 @@
 
 using namespace std;
 
-int c[9][2] = {{0,0}, {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1}};
+int e[9][2] = {{0,0}, {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1}};
 double w[9]={4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0};
 int Dx, Dy, xmin, xmax, ymin, ymax;
 
@@ -31,7 +31,7 @@ int main()
   double entry;
   /*Parameters for LB simulation*/
   int nbOfChunks, nbOfTimeSteps, numberOfTransientSteps, Lx, Ly;
-  int facquVtk, facquRe, facquForce, facquU;
+  int facquVtk, facquRe, facquForce;
   double tau, beta;
   double Ma;   //Mach number
   string folderName, inputPopsFileName;
@@ -47,7 +47,6 @@ int main()
   input_file >> facquVtk;
   input_file >> facquRe;
   input_file >> facquForce;
-  input_file >> facquU;
   input_file.close();
   /*Compute or define other parameters*/
   Dy = 4*Ly + 1, Dx = 2*(Dy-1) + 1;
@@ -57,7 +56,12 @@ int main()
   double u0 = cs*cs*Ma;
   double nu = ot*(tau-0.5);
   double omega = 1.0/tau;
-  beta = 8*nu*u0/((Dy-1)/2)/((Dy-1)/2);
+  
+  double a;
+  /*For progressive forcing */
+  double tau_c = /*17550;*/ 35100;
+  double tau0 = tau_c + tau_c*(2.0*drand48()-1)/2.0; /*Random time between 0.5*tau_c and 2.5*tau_c*/
+  double beta0 = 8*nu*u0/((Dy-1)/2)/((Dy-1)/2);
   
 
   //----------- Misc ----------
@@ -82,6 +86,7 @@ int main()
   param << "tau : " << tau << endl;
   param << "beta : " << beta << endl;
   param.close();
+
 
   /* ---- | Allocate populations and fields | --- */
 
@@ -134,7 +139,7 @@ int main()
     {
   /*Initialization of population to equilibrium value*/
       cout << "Initializing pops to equilibrium value" << endl;
-  initializePopulations(fin, Dx, Dy);
+      initializePopulations(fin, Dx, Dy);
   initializeFields(fin, rho, ux, uy, Dx, Dy);
     }
   
@@ -142,91 +147,91 @@ int main()
   dummy = 0; dummy2 = 0;
 
   /*Open output files for Reynolds, Mach and force*/
-  //string openReFile = folderName + "/re_t.datout";
-  //string openMaFile = folderName + "/ma_t.datout";
+  string openReFile = folderName + "/re_t.datout";
+  string openMaFile = folderName + "/ma_t.datout";
   string openForceFile = folderName + "/data_force.datout";
-  string openuxFile = folderName + "/ux_t.datout";
-  ofstream ReFile, MaFile, forceFile, uxFile;
-  // ReFile.open(openReFile.c_str());
-  // MaFile.open(openMaFile.c_str());
-  uxFile.open(openuxFile.c_str(), ios::binary);
-  forceFile.open(openForceFile.c_str(), ios::binary);
+  string openBetaFile = folderName + "/beta_track.datout";
+  ofstream ReFile, MaFile, data_force, betaFile;
+  ReFile.open(openReFile.c_str());
+  MaFile.open(openMaFile.c_str());
+  data_force.open(openForceFile.c_str());
+  betaFile.open(openBetaFile.c_str());
 
   /*Start LBM*/
   //Variables for performance evaluation
-struct timeval start, end;
 
-       gettimeofday(&start,NULL);
-for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
-{
-  if(chunkID%(nbOfChunks/100)==0){dummy2++; cout<<"Running : " << dummy2<<"%"<<endl;/*\r"; fflush(stdout);*/}
+  struct timeval start, end;
 
-    for (int lbTimeStepCount=0; lbTimeStepCount<nbOfTimeSteps;lbTimeStepCount++)
-    {
-      // if(lbTimeStepCount%(nbOfTimeSteps/100)==0)
-      // 	dummy2++; cout<<dummy2<<"%\r"; fflush(stdout);
-      if(lbTimeStepCount%facquVtk==0)
+  gettimeofday(&start,NULL);
+  
+  // for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
+  //   {
+      // if(chunkID%(nbOfChunks/100)==0){dummy2++; cout<<"Running : " << dummy2<<"%"<<endl;/*\r"; fflush(stdout);*/}
+
+      for (int lbTimeStepCount=0; lbTimeStepCount<nbOfTimeSteps;lbTimeStepCount++)
 	{
-	  write_fluid_vtk(tt, Dx, Dy, rho, ux, uy, folderName.c_str());
-	  tt++;
-	}
-      /*Collision and streaming - Macroscopic fields*/
-      //streamingAndCollisionComputeMacroBodyForce(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau, beta);
-      streamingAndCollisionComputeMacroBodyForce(fin, fout, rho, ux, uy, beta, tau);
-      computeDomainNoSlipWalls_BB(fout, fin);
-      computeSquareBounceBack_TEST(fout, fin);
-      /*Reset square nodes to equilibrium*/
-      for(int x=xmin+1;x<xmax;x++)
-	{
-	  for(int y=ymin+1;y<ymax;y++)
+	  if(lbTimeStepCount%(nbOfTimeSteps/100)==0)
+	  	dummy2++; cout<<dummy2<<"%\r"; fflush(stdout);
+	  a = lbTimeStepCount/tau0;
+	  beta = beta0*(1.0-exp(-a));
+	  if(lbTimeStepCount%facquVtk==0)
 	    {
-	      for(int k=0;k<9;k++)
+	      write_fluid_vtk(tt, Dx, Dy, rho, ux, uy, folderName.c_str());
+	      betaFile << lbTimeStepCount << " " << beta << endl;
+	      tt++;
+	    }
+
+
+	  /*Collision and streaming - Macroscopic fields*/
+	  streamingAndCollisionComputeMacroBodyForce(fin, fout, rho, ux, uy, beta, tau);
+	  computeDomainNoSlipWalls_BB(fout, fin);
+	  computeSquareBounceBack_TEST(fout, fin);	  
+	  
+	  /*Reset square nodes to equilibrium*/
+	  for(int x=xmin+1;x<xmax;x++)
+	    {
+	      for(int y=ymin+1;y<ymax;y++)
 		{
-		  fout[IDX(x,y,k)] = w[k];
+		  for(int k=0;k<9;k++)
+		    {
+		      fout[IDX(x,y,k)] = w[k];
+		    }
 		}
 	    }
-	}
-      /*Swap populations*/
-      temp = fin;
-      fin = fout;
-      fout = temp;
+	  /*Swap populations*/
+	  temp = fin;
+	  fin = fout;
+	  fout = temp;
 
-      /*Compute and Write force on disk*/
-      if(lbTimeStepCount%facquForce==0)
-      {
-	F = computeForceOnSquare(fin, omega);
-	forceFile.write((char*)&F, sizeof(double));
+	  /*Compute and Write force on disk*/
+	  if(lbTimeStepCount%facquForce==0)
+	    {
+	      F = computeForceOnSquare(fin, omega);
+	      data_force << F << endl;
+	    }
+	  /*Compute Reynolds number*/
+	  if(lbTimeStepCount%facquRe==0)
+	    {      
+	      for(int y=0;y<Dy;y++)
+		{
+		  uxSum += ux[idx(Dx/4, y)];
+		}
+	      uxMean = uxSum/Dy;
+	      ReFile << lbTimeStepCount /*+ chunkID*nbOfTimeSteps*/ << " " << (uxMean*Ly)/nu << endl;
+	      //MaFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << uxMean/cs << endl;
+	      uxSum=0.0; 
+	    }
 	}
-
-
-      if(lbTimeStepCount%facquU==0)
-	{      
-	  uxFile.write((char*)&ux[idx(Dx/4,Dy/4)], sizeof(double));
-	}
-      
-      /*Compute Reynolds number*/
-      // if(lbTimeStepCount%facquRe==0)
-      // 	{      
-      // 	  for(int y=0;y<Dy;y++)
-      // 	    {
-      // 	      uxSum += ux[idx(Dx/4, y)];
-      // 	    }
-      // 	  uxMean = uxSum/Dy;
-      // 	  ReFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << (uxMean*Ly)/nu << endl;
-      // 	  //MaFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << uxMean/cs << endl;
-      // 	  uxSum=0.0; 
-      // 	  }
-    }
- }
+      //} //Chunk loop
  
  gettimeofday(&end,NULL);
   double t = (end.tv_sec - start.tv_sec)*1e6 + (end.tv_usec - start.tv_usec);
   cout << t/(nbOfTimeSteps*nbOfChunks) << endl;
   
- // ReFile.close();
- // MaFile.close();
- forceFile.close();
- uxFile.close();
+ ReFile.close();
+ MaFile.close();
+ data_force.close();
+ betaFile.close();
  /*End of run - Save populations on disk*/
  /*and complete parameters file*/
  string popsFileName = folderName + "/pops.datout";
