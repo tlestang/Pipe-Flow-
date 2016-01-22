@@ -50,7 +50,7 @@ int main()
   input_file >> facquU;
   input_file.close();
   /*Compute or define other parameters*/
-  Dy = 4*Ly + 1, Dx = 2*(Dy-1) + 1;
+  Dy = 4*Ly + 1, Dx = Dy; // 2*(Dy-1) + 1;
   xmin = (Dx-1)/2; xmax = xmin + Lx;
   ymin = (Dy-1)/2 - Ly/2; ymax = ymin + Ly;
   double cs = 1./sqrt(3); double rho0 = 1.0;
