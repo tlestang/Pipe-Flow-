@@ -209,6 +209,7 @@ int main()
 	    {
 	      F = computeForceOnSquare(fin, omega);
 	      forceFile.write((char*)&F, sizeof(double));
+	      betaFile << beta << endl;
 	    }
 	  /*Compute Reynolds number*/
 	  // if(lbTimeStepCount%facquRe==0)
