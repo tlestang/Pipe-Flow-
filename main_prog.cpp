@@ -21,7 +21,7 @@
 
 using namespace std;
 
-int e[9][2] = {{0,0}, {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1}};
+int c[9][2] = {{0,0}, {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1}};
 double w[9]={4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0};
 int Dx, Dy, xmin, xmax, ymin, ymax;
 
@@ -59,8 +59,8 @@ int main()
   
   double a;
   /*For progressive forcing */
-  double tau_c = /*17550;*/ 35100;
-  double tau0 = tau_c + tau_c*(2.0*drand48()-1)/2.0; /*Random time between 0.5*tau_c and 2.5*tau_c*/
+  double t0 = 5857;
+  double tau0 = 0.1*t0; 
   double beta0 = 8*nu*u0/((Dy-1)/2)/((Dy-1)/2);
   
 
@@ -151,10 +151,10 @@ int main()
   string openMaFile = folderName + "/ma_t.datout";
   string openForceFile = folderName + "/data_force.datout";
   string openBetaFile = folderName + "/beta_track.datout";
-  ofstream ReFile, MaFile, data_force, betaFile;
+  ofstream ReFile, MaFile, forceFile, betaFile;
   ReFile.open(openReFile.c_str());
   MaFile.open(openMaFile.c_str());
-  data_force.open(openForceFile.c_str());
+  forceFile.open(openForceFile.c_str());
   betaFile.open(openBetaFile.c_str());
 
   /*Start LBM*/
@@ -174,12 +174,12 @@ int main()
 	  	dummy2++; cout<<dummy2<<"%\r"; fflush(stdout);
 	  a = lbTimeStepCount/tau0;
 	  beta = beta0*(1.0-exp(-a));
-	  if(lbTimeStepCount%facquVtk==0)
-	    {
-	      write_fluid_vtk(tt, Dx, Dy, rho, ux, uy, folderName.c_str());
-	      betaFile << lbTimeStepCount << " " << beta << endl;
-	      tt++;
-	    }
+	  // if(lbTimeStepCount%facquVtk==0)
+	  //   {
+	  //     write_fluid_vtk(tt, Dx, Dy, rho, ux, uy, folderName.c_str());
+	  //     betaFile << lbTimeStepCount << " " << beta << endl;
+	  //     tt++;
+	  //   }
 
 
 	  /*Collision and streaming - Macroscopic fields*/
@@ -207,20 +207,20 @@ int main()
 	  if(lbTimeStepCount%facquForce==0)
 	    {
 	      F = computeForceOnSquare(fin, omega);
-	      data_force << F << endl;
+	      forceFile.write((char*)&F, sizeof(double));
 	    }
 	  /*Compute Reynolds number*/
-	  if(lbTimeStepCount%facquRe==0)
-	    {      
-	      for(int y=0;y<Dy;y++)
-		{
-		  uxSum += ux[idx(Dx/4, y)];
-		}
-	      uxMean = uxSum/Dy;
-	      ReFile << lbTimeStepCount /*+ chunkID*nbOfTimeSteps*/ << " " << (uxMean*Ly)/nu << endl;
-	      //MaFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << uxMean/cs << endl;
-	      uxSum=0.0; 
-	    }
+	  // if(lbTimeStepCount%facquRe==0)
+	  //   {      
+	  //     for(int y=0;y<Dy;y++)
+	  // 	{
+	  // 	  uxSum += ux[idx(Dx/4, y)];
+	  // 	}
+	  //     uxMean = uxSum/Dy;
+	  //     ReFile << lbTimeStepCount /*+ chunkID*nbOfTimeSteps*/ << " " << (uxMean*Ly)/nu << endl;
+	  //     //MaFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << uxMean/cs << endl;
+	  //     uxSum=0.0; 
+	  //   }
 	}
       //} //Chunk loop
  
@@ -230,7 +230,7 @@ int main()
   
  ReFile.close();
  MaFile.close();
- data_force.close();
+ forceFile.close();
  betaFile.close();
  /*End of run - Save populations on disk*/
  /*and complete parameters file*/

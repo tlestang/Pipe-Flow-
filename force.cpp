@@ -139,7 +139,6 @@ double computeForceOnSquare(double *f, double omega)
     }
 
   totalForce = fWest + fEast + fNorth + fSouth;
-  std::cout << f[IDX(5,y0,5)] << std::endl;
   return totalForce;
 
 }

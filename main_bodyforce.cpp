@@ -157,19 +157,19 @@ int main()
 struct timeval start, end;
 
        gettimeofday(&start,NULL);
-for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
-{
-  if(chunkID%(nbOfChunks/100)==0){dummy2++; cout<<"Running : " << dummy2<<"%"<<endl;/*\r"; fflush(stdout);*/}
+// for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
+// {
+       //if(chunkID%(nbOfChunks/100)==0){dummy2++; cout<<"Running : " << dummy2<<"%"<<endl;/*\r"; fflush(stdout);*/}
 
     for (int lbTimeStepCount=0; lbTimeStepCount<nbOfTimeSteps;lbTimeStepCount++)
     {
-      // if(lbTimeStepCount%(nbOfTimeSteps/100)==0)
-      // 	dummy2++; cout<<dummy2<<"%\r"; fflush(stdout);
+       if(lbTimeStepCount%(nbOfTimeSteps/100)==0)
+       	dummy2++; cout<<dummy2<<"%\r"; fflush(stdout);
       if(lbTimeStepCount%facquVtk==0)
-	{
-	  write_fluid_vtk(tt, Dx, Dy, rho, ux, uy, folderName.c_str());
-	  tt++;
-	}
+      	{
+      	  write_fluid_vtk(tt, Dx, Dy, rho, ux, uy, folderName.c_str());
+      	  tt++;
+      	}
       /*Collision and streaming - Macroscopic fields*/
       //streamingAndCollisionComputeMacroBodyForce(popHeapIn, popHeapOut, rhoHeap, uFieldHeap, Dx, Dy, tau, beta);
       streamingAndCollisionComputeMacroBodyForce(fin, fout, rho, ux, uy, beta, tau);
@@ -199,10 +199,10 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
 	}
 
 
-      if(lbTimeStepCount%facquU==0)
-	{      
-	  uxFile.write((char*)&ux[idx(Dx/4,Dy/4)], sizeof(double));
-	}
+      // if(lbTimeStepCount%facquU==0)
+      // 	{      
+      // 	  uxFile.write((char*)&ux[idx(Dx/4,Dy/4)], sizeof(double));
+      // 	}
       
       /*Compute Reynolds number*/
       // if(lbTimeStepCount%facquRe==0)
@@ -217,7 +217,7 @@ for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
       // 	  uxSum=0.0; 
       // 	  }
     }
- }
+    //}
  
  gettimeofday(&end,NULL);
   double t = (end.tv_sec - start.tv_sec)*1e6 + (end.tv_usec - start.tv_usec);

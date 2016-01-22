@@ -4,7 +4,10 @@ bodyforce: main_bodyforce.o initialize_lattice_arrays.o streamCollCompute.o doma
 	g++ -o run_bodyforce main_bodyforce.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o 
 
 prog: main_prog.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
-	g++ -o run_prog main_prog.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o 
+	g++ -o run_prog main_prog.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
+
+random: main_random.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
+	g++ -o run_random main_random.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o 
 
 analysis: main_analysis.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk_mean.o
 	g++ -o run_analysis main_analysis.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk_mean.o
@@ -25,6 +28,8 @@ main_pressure.o: main_pressure.cpp
 	g++ -o main_pressure.o -c main_pressure.cpp $(CXXFLAGS)
 main_prog.o: main_prog.cpp
 	g++ -o main_prog.o -c main_prog.cpp $(CXXFLAGS)
+main_random.o: main_random.cpp
+	g++ -o main_random.o -c main_random.cpp $(CXXFLAGS)
 main_benchmark.o: main_benchmark.cpp
 	g++ -o main_benchmark.o -c main_benchmark.cpp $(CXXFLAGS)
 
