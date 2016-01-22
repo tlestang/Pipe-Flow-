@@ -47,9 +47,10 @@ int main()
   input_file >> facquVtk;
   input_file >> facquRe;
   input_file >> facquForce;
+  input_file >> tau0;
   input_file.close();
   /*Compute or define other parameters*/
-  Dy = 4*Ly + 1, Dx = 2*(Dy-1) + 1;
+  Dy = 4*Ly + 1, Dx = Dy; //Dx = 2*(Dy-1) + 1;
   xmin = (Dx-1)/2; xmax = xmin + Lx;
   ymin = (Dy-1)/2 - Ly/2; ymax = ymin + Ly;
   double cs = 1./sqrt(3); double rho0 = 1.0;
@@ -59,8 +60,8 @@ int main()
   
   double a;
   /*For progressive forcing */
-  double t0 = 5857;
-  double tau0 = 0.1*t0; 
+  //double t0 = 5857;
+  //double tau0 = 0.1*t0; 
   double beta0 = 8*nu*u0/((Dy-1)/2)/((Dy-1)/2);
   
 
