@@ -32,7 +32,7 @@ int main()
   /*Parameters for LB simulation*/
   int nbOfChunks, nbOfTimeSteps, numberOfTransientSteps, Lx, Ly;
   int facquVtk, facquRe, facquForce;
-  double tau, beta;
+  double tau, beta,tau0;
   double Ma;   //Mach number
   string folderName, inputPopsFileName;
   /*Reads input file*/
@@ -167,7 +167,7 @@ int main()
   
   // for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
   //   {
-      // if(chunkID%(nbOfChunks/100)==0){dummy2++; cout<<"Running : " << dummy2<<"%"<<endl;/*\r"; fflush(stdout);*/}
+  //     if(chunkID%(nbOfChunks/100)==0){dummy2++; cout<<"Running : " << dummy2<<"%"<<endl;/*\r"; fflush(stdout);*/}
 
       for (int lbTimeStepCount=0; lbTimeStepCount<nbOfTimeSteps;lbTimeStepCount++)
 	{
