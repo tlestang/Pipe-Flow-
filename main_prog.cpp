@@ -32,7 +32,7 @@ int main()
   /*Parameters for LB simulation*/
   int nbOfChunks, nbOfTimeSteps, numberOfTransientSteps, Lx, Ly;
   int facquVtk, facquRe, facquForce;
-  double tau, beta,tau0;
+  double tau, beta;
   double Ma;   //Mach number
   string folderName, inputPopsFileName;
   /*Reads input file*/
@@ -47,7 +47,6 @@ int main()
   input_file >> facquVtk;
   input_file >> facquRe;
   input_file >> facquForce;
-  input_file >> tau0;
   input_file.close();
   /*Compute or define other parameters*/
   Dy = 4*Ly + 1, Dx = Dy; //Dx = 2*(Dy-1) + 1;
@@ -59,10 +58,14 @@ int main()
   double omega = 1.0/tau;
   
   double a;
-  /*For progressive forcing */
-  //double t0 = 5857;
-  //double tau0 = 0.1*t0; 
+  /*For progressive forcing */;
+  int tau0 = floor(0.05*nbOfTimeSteps);
+  double t_var, inside_sin, om, alpha, amplitude;
+  alpha = 4.6;
+  om = 6;
+  amplitude = 5;
   double beta0 = 8*nu*u0/((Dy-1)/2)/((Dy-1)/2);
+  double pulsa = 4*M_PI/tau0;
   
 
   //----------- Misc ----------
@@ -86,6 +89,7 @@ int main()
   param << "Dy : " << Dy << endl;
   param << "tau : " << tau << endl;
   param << "beta : " << beta << endl;
+  param << "tau0 : " << tau0 << endl;
   param.close();
 
 
@@ -169,18 +173,63 @@ int main()
   //   {
   //     if(chunkID%(nbOfChunks/100)==0){dummy2++; cout<<"Running : " << dummy2<<"%"<<endl;/*\r"; fflush(stdout);*/}
 
-      for (int lbTimeStepCount=0; lbTimeStepCount<nbOfTimeSteps;lbTimeStepCount++)
+  //beta = 50*beta0;
+    for (int lbTimeStepCount=0; lbTimeStepCount<tau0+1;lbTimeStepCount++)
+      {
+	if(lbTimeStepCount%facquVtk==0)
+		    {
+		      write_fluid_vtk(tt, Dx, Dy, rho, ux, uy, folderName.c_str());
+		      tt++;
+		    }
+	if(lbTimeStepCount%(nbOfTimeSteps/100)==0)
+	  dummy2++; cout<<dummy2<<"%\r"; fflush(stdout);
+	t_var = double(lbTimeStepCount)/double(tau0);
+	inside_sin = 2*M_PI*(1.0-exp(-om*t_var));
+	beta = beta0*(1.0 + amplitude*exp(-alpha*t_var)*sin(inside_sin));
+	/*Collision and streaming - Macroscopic fields*/
+	streamingAndCollisionComputeMacroBodyForce(fin, fout, rho, ux, uy, beta, tau);
+	computeDomainNoSlipWalls_BB(fout, fin);
+	computeSquareBounceBack_TEST(fout, fin);	  
+	  
+	/*Reset square nodes to equilibrium*/
+	for(int x=xmin+1;x<xmax;x++)
+	  {
+	    for(int y=ymin+1;y<ymax;y++)
+	      {
+		for(int k=0;k<9;k++)
+		  {
+		    fout[IDX(x,y,k)] = w[k];
+		  }
+	      }
+	  }
+	/*Swap populations*/
+	temp = fin;
+	fin = fout;
+	fout = temp;
+
+	/*Compute and Write force on disk*/
+	if(lbTimeStepCount%facquForce==0)
+	  {
+	    F = computeForceOnSquare(fin, omega);
+	    forceFile.write((char*)&F, sizeof(double));
+	    betaFile << beta << endl;
+	  }
+      }
+
+    beta = beta0;
+    cout << "FIRST LOOP DONE" << endl;
+      for (int lbTimeStepCount=tau0+1; lbTimeStepCount<nbOfTimeSteps;lbTimeStepCount++)
 	{
 	  if(lbTimeStepCount%(nbOfTimeSteps/100)==0)
 	  	dummy2++; cout<<dummy2<<"%\r"; fflush(stdout);
-	  a = lbTimeStepCount/tau0;
-	  beta = beta0*(1.0-exp(-a));
-	  // if(lbTimeStepCount%facquVtk==0)
-	  //   {
-	  //     write_fluid_vtk(tt, Dx, Dy, rho, ux, uy, folderName.c_str());
-	  //     betaFile << lbTimeStepCount << " " << beta << endl;
-	  //     tt++;
-	  //   }
+	  // a = lbTimeStepCount/tau0;
+	  // beta = beta0*(1.0-exp(-a));
+	  if(lbTimeStepCount%facquVtk==0)
+	    {
+	      write_fluid_vtk(tt, Dx, Dy, rho, ux, uy, folderName.c_str());
+	      betaFile << lbTimeStepCount << " " << beta << endl;
+	      tt++;
+	    }
 
 
 	  /*Collision and streaming - Macroscopic fields*/
