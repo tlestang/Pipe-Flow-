@@ -45,10 +45,10 @@ int main()
   input_file >> folderName;
   input_file >> inputPopsFileName;
   input_file >> facquVtk;
-  input_file >> facquRe;
   input_file >> facquForce;
   input_file >> facquU;
   input_file.close();
+  
   /*Compute or define other parameters*/
   Dy = 4*Ly + 1, Dx = Dy; // 2*(Dy-1) + 1;
   xmin = (Dx-1)/2; xmax = xmin + Lx;
@@ -71,6 +71,8 @@ int main()
   system(instru.c_str());
   instru = "mkdir " + folderName + "/vtk_fluid/";
   system(instru.c_str());
+
+
   /* --- | Create parameters file | --- */
   string openParamFile = folderName + "/parameters.datout";
   ofstream param;
@@ -91,79 +93,42 @@ int main()
   ux = (double *) memalign(getpagesize(), Dx*Dy*sizeof(double));
   uy = (double *) memalign(getpagesize(), Dx*Dy*sizeof(double));
   
-  // popHeapIn = new double**[Dx]; popHeapOut = new double**[Dx];
-  // for (int i=0;i<Dx;i++)
-  //   {
-  //     popHeapIn[i] = new double*[Dy];
-  //     popHeapOut[i] = new double*[Dy];
-  //     for(int j=0;j<Dy;j++)
-  // 	{
-  // 	  popHeapOut[i][j] = new double[9];
-  // 	  popHeapIn[i][j] = new double[9];
-  // 	}
-  //   }
-  // rhoHeap = new double*[Dx]; uFieldHeap = new double**[Dx];
-  // for(int i=0;i<Dx;i++)
-  //   {
-  //     rhoHeap[i] = new double[Dy];
-  //     uFieldHeap[i] = new double*[Dy];
-  //     for (int j=0;j<Dy;j++)
-  // 	{
-  // 	  uFieldHeap[i][j] = new double[2];
-  // 	}
-  //   }
-
-
   if(inputPopsFileName != "0")
     {
-      ifstream popFile(inputPopsFileName.c_str());
+      ifstream popFile(inputPopsFileName.c_str(), ios::binary);
       cout << "Initialized populations taken from " << inputPopsFileName << endl;
-      for(int x=0;x<Dx;x++)
-	{
-	  for(int y=0;y<Dy;y++)
-	    {
-	      for(int k=0;k<9;k++)
-		{
-		  popFile >> fin[IDX(x,y,k)];
-		}
-	    }
-	}
+      popFile.read((char*)&fin[0], Dx*Dy*9*sizeof(double));
       popFile.close();
     }
   else
     {
   /*Initialization of population to equilibrium value*/
       cout << "Initializing pops to equilibrium value" << endl;
-  initializePopulations(fin, Dx, Dy);
-  initializeFields(fin, rho, ux, uy, Dx, Dy);
+      initializePopulations(fin, Dx, Dy);
+      initializeFields(fin, rho, ux, uy, Dx, Dy);
     }
   
   /*Initialize counters*/
   dummy = 0; dummy2 = 0;
 
   /*Open output files for Reynolds, Mach and force*/
-  //string openReFile = folderName + "/re_t.datout";
-  //string openMaFile = folderName + "/ma_t.datout";
+
   string openForceFile = folderName + "/data_force.datout";
   string openuxFile = folderName + "/ux_t.datout";
   ofstream ReFile, MaFile, forceFile, uxFile;
-  // ReFile.open(openReFile.c_str());
-  // MaFile.open(openMaFile.c_str());
+
   uxFile.open(openuxFile.c_str(), ios::binary);
   forceFile.open(openForceFile.c_str(), ios::binary);
 
   /*Start LBM*/
-  //Variables for performance evaluation
-struct timeval start, end;
 
-       gettimeofday(&start,NULL);
-// for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
-// {
-       //if(chunkID%(nbOfChunks/100)==0){dummy2++; cout<<"Running : " << dummy2<<"%"<<endl;/*\r"; fflush(stdout);*/}
+  // for(int chunkID=0;chunkID<nbOfChunks;chunkID++)
+  // {
+  //        if(chunkID%(nbOfChunks/100)==0){dummy2++; cout<<"Running : " << dummy2<<"%"<<endl;/*\r"; fflush(stdout);*/}
 
-    for (int lbTimeStepCount=0; lbTimeStepCount<nbOfTimeSteps;lbTimeStepCount++)
+  for (int lbTimeStepCount=0; lbTimeStepCount<nbOfTimeSteps;lbTimeStepCount++)
     {
-       if(lbTimeStepCount%(nbOfTimeSteps/100)==0)
+      if(lbTimeStepCount%(nbOfTimeSteps/100)==0)
        	dummy2++; cout<<dummy2<<"%\r"; fflush(stdout);
       if(lbTimeStepCount%facquVtk==0)
       	{
@@ -193,53 +158,26 @@ struct timeval start, end;
 
       /*Compute and Write force on disk*/
       if(lbTimeStepCount%facquForce==0)
-      {
-	F = computeForceOnSquare(fin, omega);
-	forceFile.write((char*)&F, sizeof(double));
+	{
+	  F = computeForceOnSquare(fin, omega);
+	  forceFile.write((char*)&F, sizeof(double));
 	}
 
 
-      // if(lbTimeStepCount%facquU==0)
-      // 	{      
-      // 	  uxFile.write((char*)&ux[idx(Dx/4,Dy/4)], sizeof(double));
-      // 	}
+      if(lbTimeStepCount%facquU==0)
+      	{      
+      	  uxFile.write((char*)&ux[idx(Dx/4,Dy/4)], sizeof(double));
+      	}
       
-      /*Compute Reynolds number*/
-      // if(lbTimeStepCount%facquRe==0)
-      // 	{      
-      // 	  for(int y=0;y<Dy;y++)
-      // 	    {
-      // 	      uxSum += ux[idx(Dx/4, y)];
-      // 	    }
-      // 	  uxMean = uxSum/Dy;
-      // 	  ReFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << (uxMean*Ly)/nu << endl;
-      // 	  //MaFile << lbTimeStepCount + chunkID*nbOfTimeSteps << " " << uxMean/cs << endl;
-      // 	  uxSum=0.0; 
-      // 	  }
     }
-    //}
+  //}
  
- gettimeofday(&end,NULL);
-  double t = (end.tv_sec - start.tv_sec)*1e6 + (end.tv_usec - start.tv_usec);
-  cout << t/(nbOfTimeSteps*nbOfChunks) << endl;
-  
- // ReFile.close();
- // MaFile.close();
- forceFile.close();
- uxFile.close();
- /*End of run - Save populations on disk*/
- /*and complete parameters file*/
- string popsFileName = folderName + "/pops.datout";
- ofstream pops_output_file(popsFileName.c_str());
-  for(int x=0;x<Dx;x++)
-   {
-     for(int y=0;y<Dy;y++)
-       {
-	 for(int k=0;k<9;k++)
-	   {
-	     pops_output_file << fin[IDX(x,y,k)] << endl;
-	   }
-       }
-   }
-   pops_output_file.close();
+  forceFile.close();
+  uxFile.close();
+  /*End of run - Save populations on disk*/
+  /*and complete parameters file*/
+  string popsFileName = folderName + "/pops.datout";
+  ofstream pops_output_file(popsFileName.c_str(), ios::binary);
+  pops_output_file.write((char*)&fin[0], Dx*Dy*9*sizeof(double));
+  pops_output_file.close();
 }

@@ -1,7 +1,10 @@
 CXXFLAGS=-O3 
 
 bodyforce: main_bodyforce.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
-	g++ -o run_bodyforce main_bodyforce.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o 
+	g++ -o run_bodyforce main_bodyforce.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
+
+init: main_init.o initialize_lattice_arrays.o streamCollComputeInit.o domain_noSlipWalls.o square.o force.o write_vtk.o
+	g++ -o run_init main_init.o initialize_lattice_arrays.o streamCollComputeInit.o domain_noSlipWalls.o square.o force.o write_vtk.o 	
 
 prog: main_prog.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
 	g++ -o run_prog main_prog.o initialize_lattice_arrays.o streamCollCompute.o domain_noSlipWalls.o square.o force.o write_vtk.o
@@ -22,6 +25,8 @@ benchmark: main_benchmark.o initialize_lattice_arrays.o streamCollCompute.o doma
 
 main_bodyforce.o: main_bodyforce.cpp
 	g++ -o main_bodyforce.o -c main_bodyforce.cpp $(CXXFLAGS)
+main_init.o: main_init.cpp
+	g++ -o main_init.o -c main_init.cpp $(CXXFLAGS)
 main_analysis.o: main_bodyforce.cpp
 	g++ -o main_analysis.o -c main_analysis.cpp $(CXXFLAGS)
 main_pressure.o: main_pressure.cpp
@@ -39,6 +44,8 @@ initialize_lattice_arrays.o: initialize_lattice_arrays.cpp
 	g++ -o initialize_lattice_arrays.o -c initialize_lattice_arrays.cpp $(CXXFLAGS)
 streamCollCompute.o: streamCollCompute.cpp
 	g++ -o streamCollCompute.o -c streamCollCompute.cpp $(CXXFLAGS)
+streamCollComputeInit.o: streamCollComputeInit.cpp
+	g++ -o streamCollComputeInit.o -c streamCollComputeInit.cpp $(CXXFLAGS)
 domain_noSlipWalls.o: domain_noSlipWalls.cpp
 	g++ -o domain_noSlipWalls.o -c domain_noSlipWalls.cpp $(CXXFLAGS)
 domain_InletOutlet.o: domain_InletOutlet.cpp

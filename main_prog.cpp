@@ -65,8 +65,6 @@ int main()
   om = 6;
   amplitude = 5;
   double beta0 = 8*nu*u0/((Dy-1)/2)/((Dy-1)/2);
-  double pulsa = 4*M_PI/tau0;
-  
 
   //----------- Misc ----------
   double uxSum = 0.0, uxMean;
@@ -227,7 +225,6 @@ int main()
 	  if(lbTimeStepCount%facquVtk==0)
 	    {
 	      write_fluid_vtk(tt, Dx, Dy, rho, ux, uy, folderName.c_str());
-	      betaFile << lbTimeStepCount << " " << beta << endl;
 	      tt++;
 	    }
 
