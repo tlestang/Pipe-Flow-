@@ -31,7 +31,7 @@ int main()
   double entry;
   /*Parameters for LB simulation*/
   int nbOfChunks, nbOfTimeSteps, numberOfTransientSteps, Lx, Ly;
-  int facquVtk, facquRe, facquForce, facquU;
+  int facquVtk, facquRe, facquForce, facquU, facquPops;
   double tau, beta;
   double Ma;   //Mach number
   string folderName, inputPopsFileName;
@@ -47,6 +47,7 @@ int main()
   input_file >> facquVtk;
   input_file >> facquForce;
   input_file >> facquU;
+  input_file >> facquPops;
   input_file.close();
   
   /*Compute or define other parameters*/
@@ -66,12 +67,16 @@ int main()
   int dummy, dummy2;
   /*Populations and macroscopic fields*/
   double *fin, *fout, *rho, *ux, *uy, *temp;
+  
   /* --- | Create folder for storing data | ---  */
+  string popsFileName;
   string instru = "mkdir " + folderName;
+  ofstream pops_output_file;
   system(instru.c_str());
   instru = "mkdir " + folderName + "/vtk_fluid/";
   system(instru.c_str());
-
+  instru = "mkdir " + folderName + "/populations/";
+  system(instru.c_str());
 
   /* --- | Create parameters file | --- */
   string openParamFile = folderName + "/parameters.datout";
@@ -163,21 +168,31 @@ int main()
 	  forceFile.write((char*)&F, sizeof(double));
 	}
 
-
       if(lbTimeStepCount%facquU==0)
       	{      
       	  uxFile.write((char*)&ux[idx(Dx/4,Dy/4)], sizeof(double));
       	}
       
+      if(lbTimeStepCount%facquPops==0)
+	{
+	  stringstream fileName;
+	  fileName << "pops_" << lbTimeStepCount << ".datout";
+	  popsFileName = folderName+"/populations/"+fileName.str();
+	  pops_output_file.open(popsFileName.c_str(), ios::binary);
+	  pops_output_file.write((char*)&fin[0], Dx*Dy*9*sizeof(double));
+	  pops_output_file.close();
+	}
+      
     }
   //}
- 
-  forceFile.close();
+
   uxFile.close();
+  forceFile.close();
   /*End of run - Save populations on disk*/
   /*and complete parameters file*/
-  string popsFileName = folderName + "/pops.datout";
-  ofstream pops_output_file(popsFileName.c_str(), ios::binary);
+  popsFileName = folderName + "/pops_final.datout";
+  pops_output_file.open(popsFileName.c_str(), ios::binary);
   pops_output_file.write((char*)&fin[0], Dx*Dy*9*sizeof(double));
   pops_output_file.close();
+  
 }
