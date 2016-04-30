@@ -56,7 +56,7 @@ void streamingAndCollisionComputeMacroBodyForceSpatial(double *fin, double *fout
   double beta;
   int nx, ny;
 
-  double eps = 0.1;
+  double eps = 0.0;
     for(int x=0;x<Dx;x++)
     {
       for(int y=0;y<Dy;y++)
